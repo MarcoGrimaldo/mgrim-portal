@@ -1,0 +1,16 @@
+{
+  "name": "mgrim-portal",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Backend for mgrim.dev: Supabase schema, migrations and deployment",
+  "scripts": {
+    "start": "supabase start",
+    "stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:push": "supabase db push",
+    "db:types": "supabase gen types typescript --local --schema public > database.types.ts"
+  },
+  "devDependencies": {
+    "supabase": "2.120.0"
+  }
+}

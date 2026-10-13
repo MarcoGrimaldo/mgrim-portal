@@ -1,0 +1,34 @@
+name: Deploy to Supabase
+
+# Applies supabase/migrations and deploys the Edge Functions to the Supabase project
+# that matches the branch:
+#   staging -> "staging" GitHub environment, main -> "production" GitHub environment.
+# Each environment needs the secrets SUPABASE_PROJECT_REF and SUPABASE_DB_PASSWORD;
+# SUPABASE_ACCESS_TOKEN is a repository secret.
+
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - "supabase/**"
+  workflow_dispatch:
+
+concurrency:
+  group: supabase-deploy-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.120.0
+      - run: supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+      - run: supabase db push
+      - run: supabase functions deploy
